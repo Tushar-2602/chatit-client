@@ -21,7 +21,9 @@ export const messageRecieveHandler = function (instance, rawData) {
 
       case "group": {
         instance.emit("groupMessage", data);
-         handleAck(instance, data);
+         if (data.fromUserId != instance.config.userId) {
+          handleAck(instance, data);
+         }
         break;
       }
 
@@ -42,7 +44,7 @@ export const messageRecieveHandler = function (instance, rawData) {
           }
 
           case "error": {
-            emitErrorMessage(instance,data);
+            emitErrorMessage(instance,data.payload,data.messageId,data.code);
             //handleAckDelivered(instance, data);
             break;
           }
@@ -67,6 +69,11 @@ export const messageRecieveHandler = function (instance, rawData) {
 
           case "pong": {
             instance.config.isAlive = true;
+            break;
+          }
+
+          case "userId": {
+            instance.config.userId = data.userId;
             break;
           }
 
@@ -97,17 +104,17 @@ function handleMessageResponseWithSequenceNumber(
 
 export const handleAck = (instance,data)=>{
 const {messageId,sequenceNumber} = data;
-if (messageId && sequenceNumber) {
-  console.log("ack sent");
+if (messageId) {
   
   const ws = instance.config?.ws;
   ws.send(
-      JSON.stringify({
-        msgType: "system",
-        subType: "ack",
-        messageId,
-        sequenceNumber
-      })
-    );
+    JSON.stringify({
+      msgType: "system",
+      subType: "ack",
+      messageId,
+      ...(sequenceNumber && {sequenceNumber})
+    })
+  );
+  console.log("ack sent "+sequenceNumber);
 }
 }

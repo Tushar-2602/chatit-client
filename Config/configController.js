@@ -7,11 +7,20 @@ Chatty.prototype.changeConfig = async function(options={}) {
           this.config.connectionUrl=options.url;
       }
       if (options.token) {
-          this.config.connectionUrl=options.token;
+          this.config.token=options.token;
       }
       if (options.userId) {
-          this.config.connectionUrl=options.userId;
+          this.config.userId=options.userId;
       }
+  } catch (error) {
+    emitError(this,error);
+    throw error;
+  }
+}
+
+Chatty.prototype.getConfig = async function(options={}) {
+  try {
+      return instance.config;
   } catch (error) {
     emitError(this,error);
     throw error;

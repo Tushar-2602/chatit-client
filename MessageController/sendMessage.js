@@ -3,9 +3,12 @@ import { emitError } from "../Utils/error.js";
 import { randomUUID } from "crypto";
 
 Chatty.prototype.sendDirectMessage = async function (userId,payload) {
-try {
-    const ws = this.config.ws;
     const messageId = randomUUID();
+try {
+    if (!userId || !payload) {
+      throw "userId or payload not provided";
+    }
+    const ws = this.config.ws;
     ws.send(
       JSON.stringify({
         msgType: "direct",
@@ -15,17 +18,22 @@ try {
 
       })
     );
-    return messageId;
 } catch (error) {
-    emitError(this,error);
-    throw error;
+    emitError(this,error,messageId);
+
+    //throw error;
+} finally {
+  return messageId;
 }
 };
 
 Chatty.prototype.sendGroupMessage = async function (groupId,payload) {
+  const messageId = randomUUID();
 try {
+  if (!groupId || !payload) {
+      throw "groupId or payload not provided";
+    }
     const ws = this.config.ws;
-    const messageId = randomUUID();
     ws.send(
       JSON.stringify({
         msgType: "group",
@@ -36,15 +44,21 @@ try {
 
       })
     );
-    return messageId;
+
 } catch (error) {
-    emitError(this,error);
-    throw error;
+    emitError(this,error,messageId);
+  
+} finally {
+  return messageId;
 }
 };
 
 Chatty.prototype.sendSystemMessage = async function (payload) {
+  const messageId = randomUUID();
 try {
+  if (!payload) {
+      throw "payload not provided";
+    }
     const ws = this.config.ws;
     ws.send(
       JSON.stringify({
@@ -54,8 +68,11 @@ try {
 
       })
     );
+    
 } catch (error) {
-    emitError(this,error);
-    throw error;
+    emitError(this,error,messageId);
+    
+} finally {
+  return messageId;
 }
 };
