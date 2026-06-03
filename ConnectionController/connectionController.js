@@ -30,7 +30,7 @@ export const connectionHandler = async (instance, ws) => {
 };
 
 export const connectionCloseHandler = async (instance, ws,code,reason) => {
-  console.log("ran");
+  // console.log("ran");
   
     instance.emit("connectionClose",{code,reason});
     const interval = instance.config?.interval;

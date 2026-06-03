@@ -1,5 +1,5 @@
 import { Chatty } from "../Core/src.js";
-import { emitError } from "../Utils/error.js";
+import { LibError, LibReturn } from "../Utils/error.js";
 
 Chatty.prototype.changeConfig = async function(options={}) {
   try {
@@ -12,17 +12,18 @@ Chatty.prototype.changeConfig = async function(options={}) {
       if (options.userId) {
           this.config.userId=options.userId;
       }
+      return new LibReturn();
   } catch (error) {
-    emitError(this,error);
-    throw error;
+    throw new LibError(error);
   }
 }
 
 Chatty.prototype.getConfig = async function(options={}) {
   try {
-      return instance.config;
+     // return instance.config;
+      return new LibReturn({config:this.config});
   } catch (error) {
-    emitError(this,error);
-    throw error;
+    throw new LibError(error);
+    
   }
 }

@@ -1,4 +1,4 @@
-import { emitError, emitErrorMessage } from "../Utils/error.js";
+import {  emitErrorMessage, LibError } from "../Utils/error.js";
 
 export const messageRecieveHandler = function (instance, rawData) {
   try {
@@ -8,7 +8,7 @@ export const messageRecieveHandler = function (instance, rawData) {
     const { msgType, subType } = data;
 
     if (!msgType) {
-      emitError(instance,"msgType missing");
+      throw new LibError("msgType missing",1001);
       return;
     }
 
@@ -90,7 +90,8 @@ export const messageRecieveHandler = function (instance, rawData) {
       }
     }
   } catch (error) {
-    emitError(error)
+    throw error
+
   }
 };
 
@@ -115,6 +116,6 @@ if (messageId) {
       ...(sequenceNumber && {sequenceNumber})
     })
   );
-  console.log("ack sent "+sequenceNumber);
+  // console.log("ack sent "+sequenceNumber);
 }
 }

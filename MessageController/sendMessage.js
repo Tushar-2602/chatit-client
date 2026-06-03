@@ -1,5 +1,5 @@
 import { Chatty } from "../Core/src.js";
-import { emitError } from "../Utils/error.js";
+import {  LibError, LibReturn } from "../Utils/error.js";
 import { randomUUID } from "crypto";
 
 Chatty.prototype.sendDirectMessage = async function (userId,payload) {
@@ -18,13 +18,13 @@ try {
 
       })
     );
-} catch (error) {
-    emitError(this,error,messageId);
 
-    //throw error;
-} finally {
-  return messageId;
-}
+    return new LibReturn({messageId});
+} catch (error) {
+    // emitError(this,error,messageId);
+
+    throw new LibError(error,1000,{messageId});
+} 
 };
 
 Chatty.prototype.sendGroupMessage = async function (groupId,payload) {
@@ -45,12 +45,12 @@ try {
       })
     );
 
+    return new LibReturn({messageId});
 } catch (error) {
-    emitError(this,error,messageId);
+    // emitError(this,error,messageId);
+    throw new LibError(error,1000,{messageId});
   
-} finally {
-  return messageId;
-}
+} 
 };
 
 Chatty.prototype.sendSystemMessage = async function (payload) {
@@ -58,6 +58,7 @@ Chatty.prototype.sendSystemMessage = async function (payload) {
 try {
   if (!payload) {
       throw "payload not provided";
+     // throw new LibError()
     }
     const ws = this.config.ws;
     ws.send(
@@ -68,11 +69,11 @@ try {
 
       })
     );
+    return new LibReturn({messageId});
     
 } catch (error) {
-    emitError(this,error,messageId);
+    // emitError(this,error,messageId);
+    throw new LibError(error,1000,{messageId});
     
-} finally {
-  return messageId;
-}
+} 
 };

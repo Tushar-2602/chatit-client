@@ -1,6 +1,6 @@
 import { connectionCloseHandler, connectionHandler } from "../ConnectionController/connectionController.js";
 import { messageRecieveHandler } from "../MessageController/recieveMessage.js";
-import { emitError } from "../Utils/error.js";
+import {  LibError, LibReturn } from "../Utils/error.js";
 import { Chatty } from "./src.js";
 
 Chatty.prototype.connect = async function (options = {}) {
@@ -18,7 +18,12 @@ Chatty.prototype.connect = async function (options = {}) {
     }
   
     // Dynamically import ws package
-    const { WebSocket } = await import("ws");
+    let WebSocket;
+    try {
+       ({ WebSocket } = await import("ws"));
+    } catch (error) {
+      
+    }
   
     const url = new URL(this.config.connectionUrl);
 
@@ -31,7 +36,12 @@ if (this.config.token) {
 }
 
 // Create websocket connection
-const socket = new WebSocket(url.toString());
+let socket;
+try {
+  socket = new WebSocket(url.toString());
+} catch (error) {
+  throw new LibError("if you are not running on browser then install websocket package, for node js run: npm install ws ",1010,{});
+}
   
     // Save connection
     this.config.ws = socket;
@@ -55,14 +65,15 @@ const socket = new WebSocket(url.toString());
   
     socket.on("error", (err) => {
       // handle error
-      emitError(this,err)
+      // emitError(this,err)
       connectionCloseHandler(this,socket,1004,"closed after error");
+      throw err;
     });
-  
-    return socket;
+  return new LibReturn({socket});
+    
+
   } catch (error) {
-    emitError(this,error)
-    throw error;
+    throw new LibError(error);
   }
 };
 
@@ -71,8 +82,7 @@ Chatty.prototype.disconnect = async function (code = 1000, reason = "Disconnecte
     const socket = this.config.ws;
 
     if (!socket) {
-      this.emit("error", new Error("WebSocket not connected"));
-      return;
+     throw new LibError("WebSocket not connected",1002);
     }
 
     socket.close(code, reason);
@@ -80,8 +90,9 @@ Chatty.prototype.disconnect = async function (code = 1000, reason = "Disconnecte
     this.config.ws = null;
 
     this.emit("disconnect");
+    return new LibReturn();
   } catch (error) {
-    emitError(this, error);
-    throw error;
+    
+    throw new LibError(error);
   }
 };
